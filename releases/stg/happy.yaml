@@ -1,0 +1,19 @@
+#---
+#apiVersion: flux.weave.works/v1beta1
+#kind: HelmRelease
+#metadata:
+#  name: happy-stg
+#  namespace: stg
+#  annotations:
+#    flux.weave.works/automated: "true"
+#    flux.weave.works/tag.chart-image: glob:stg-*
+#spec:
+#  releaseName: happy-stg
+#  chart:
+#    git: git@github.com:drweber/happyBDay
+#    path: charts/happy
+#    ref: stg
+#  values:
+#    containerPort: 8000
+#    image: drweber/happybday:stg-qgrowds3
+#    replicaCount: 1

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: happy
+  labels:
+    app: happy
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: happy
+  template:
+    metadata:
+      labels:
+        app: happy
+    spec:
+      containers:
+      - name: happy
+        image: "{{ .Values.image }}"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: unicorn
+        volumeMounts:
+        - name: sqlite-persistent-storage
+          mountPath: /usr/src/db
+      volumes:
+      - name: sqlite-persistent-storage
+        persistentVolumeClaim:
+          claimName: sqlite-pv-claim

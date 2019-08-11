@@ -1,0 +1,19 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: happy-dev
+  namespace: dev
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: glob:dev-*
+spec:
+  releaseName: happy-dev
+  chart:
+    git: git@github.com:drweber/happyBDay
+    path: charts/happy
+    ref: master
+  values:
+    containerPort: 8000
+    image: drweber/happybday:dev-just123fix
+    replicaCount: 1

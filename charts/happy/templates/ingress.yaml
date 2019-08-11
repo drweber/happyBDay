@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: happy-ingress
+  labels:
+    app: happy
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - http:
+      paths:
+        - path: /dev
+          backend:
+            serviceName: happy-backend
+            servicePort: 8000
