@@ -1,8 +1,51 @@
-# Default values for happyBDay.
+# Default values for HappyDay.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-image: drweber/happybday:dev-af3ada
+replicaCount: 1
+name: sayHello
+
+image:
+  repository: drweber/sayhello
+  tag: latest
+  pullPolicy: IfNotPresent
 
 nameOverride: ""
 fullnameOverride: ""
+
+secrets:
+  enabled: false
+
+env:
+  USER_NAME: World
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+#  cpu: 100m
+#  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

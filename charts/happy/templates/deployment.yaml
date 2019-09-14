@@ -1,30 +1,86 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: happy
+  name: {{ include "happy.fullname" . }}
+  namespace: {{ .Values.namespace}}
   labels:
-    app: happy
+    app.kubernetes.io/name: {{ include "happy.name" . }}
+    helm.sh/chart: {{ include "happy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: happy
+      app.kubernetes.io/name: {{ include "happy.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
-        app: happy
+        app.kubernetes.io/name: {{ include "happy.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      containers:
-      - name: happy
-        image: "{{ .Values.image }}"
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8080
-          name: unicorn
-        volumeMounts:
-        - name: sqlite-persistent-storage
-          mountPath: /usr/src/db
       volumes:
-      - name: sqlite-persistent-storage
-        persistentVolumeClaim:
-          claimName: sqlite-pv-claim
+        - name: sqlite-persistent-storage
+          persistentVolumeClaim:
+            claimName: sqlite-pv-claim
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: unicorn
+              containerPort: {{ .Values.containerPort}}
+              protocol: TCP
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: http
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 3
+            periodSeconds: 3
+            successThreshold: 1
+            timeoutSeconds: 1
+          volumeMounts:
+            - name: sqlite-persistent-storage
+              mountPath: /usr/src/db
+          env:
+            {{- if .Values.envSecret.enabled }}
+            {{- range $key, $val := .Values.envSecret }}
+            - name: {{ $key | quote }}
+              valueFrom:
+                secretKeyRef:
+                  key: {{ $key | lower | replace "_" "-" }}
+                  name: {{ $val | quote }}
+                  {{- end }}
+            {{- end }}
+            {{- if .Values.env}}
+            {{- range $key, $val := .Values.env }}
+            - name: {{ $key | quote }}
+              value: {{ $val | quote }}
+                {{- end }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+            {{- with .Values.nodeSelector }}
+      nodeSelector:
+            {{- toYaml . | nindent 8 }}
+            {{- end }}
+            {{- with .Values.affinity }}
+      affinity:
+            {{- toYaml . | nindent 8 }}
+            {{- end }}
+            {{- with .Values.tolerations }}
+      tolerations:
+          {{- toYaml . | nindent 8 }}
+        {{- end }}

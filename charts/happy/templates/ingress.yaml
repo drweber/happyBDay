@@ -1,16 +1,36 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "happy.fullname" . -}}
+{{- $ingressPaths := .Values.ingress.paths -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: happy-ingress
+  name: {{ include "happy.name" . }}-ingress
+  namespace: {{ .Values.namespace}}
   labels:
-    app: happy
+    app.kubernetes.io/name: {{ include "happy.name" . }}
+    helm.sh/chart: {{ include "happy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  {{- with .Values.ingress.annotations }}
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
   rules:
     - http:
-      paths:
+        paths:
         - path: /dev
           backend:
-            serviceName: happy-backend
-            servicePort: 8000
+            serviceName: {{ include "happy.name" . }}-service
+            servicePort: unicorn
+{{- end }}

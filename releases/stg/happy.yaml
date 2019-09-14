@@ -1,19 +1,24 @@
-#---
-#apiVersion: flux.weave.works/v1beta1
-#kind: HelmRelease
-#metadata:
-#  name: happy-stg
-#  namespace: stg
-#  annotations:
-#    flux.weave.works/automated: "true"
-#    flux.weave.works/tag.chart-image: glob:stg-*
-#spec:
-#  releaseName: happy-stg
-#  chart:
-#    git: git@github.com:drweber/happyBDay
-#    path: charts/happy
-#    ref: stg
-#  values:
-#    containerPort: 8000
-#    image: drweber/happybday:stg-qgrowds3
-#    replicaCount: 1
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: happy-stg
+  namespace: stg
+  annotations:
+    flux.weave.works/automated: "true"
+    flux.weave.works/tag.chart-image: semver:~0.1
+spec:
+  releaseName: sayhello-stg
+  chart:
+    git: git@github.com:drweber/happyBDay
+    path: charts/happy
+    ref: dev
+  values:
+    loadbalancer:
+      enabled: true
+    containerPort: 8080
+    image: drweber/happybday:0.1.0
+    replicaCount: 1
+    env:
+      #Here is Custom Name is putting for the same helm chart
+      USER_NAME: "Custom"

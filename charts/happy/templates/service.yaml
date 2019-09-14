@@ -1,15 +1,24 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: happy-backend
+  name: {{ include "happy.name" . }}-service
+  namespace: {{ .Values.namespace}}
   labels:
-    app: happy
+    app.kubernetes.io/name: {{ include "happy.name" . }}
+    helm.sh/chart: {{ include "happy.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
 spec:
   selector:
-    app: happy
+    matchLabels:
+      app.kubernetes.io/name: {{ include "happy.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   type: ClusterIP
   ports:
   - port: 8080
     targetPort: 8080
     protocol: TCP
     name: http
+  {{- if .Values.loadbalancer.enabled }}
+  type: LoadBalancer
+  {{- end }}

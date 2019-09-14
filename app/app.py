@@ -25,6 +25,7 @@ schema_validation = {
 
 app = Flask(__name__)
 database.init_db()
+app_user = os.getenv("USER_NAME", "world")
 
 @app.errorhandler(404)
 def method_not_allowed(e):
@@ -39,10 +40,23 @@ def method_not_allowed(e):
 def method_not_allowed(e):
     return json.dumps(
         {
-            'error': 'requested method is not allowed',
-            'allowed_method': 'GET, PUT'
+            'error': 'requested HTTP method is not allowed',
+            # 'allowed_method': 'GET, PUT'
         }
     ), 405
+
+@app.route("/sayHello", methods=['GET'])
+def say_hello(user=app_user):
+    data = {
+        "Message": "Hello, " + user + "!"
+    }
+    message = json.dumps(data)
+    resp = Response(message, status=200, mimetype='application/json')
+    return resp
+
+@app.route("/healthz", methods=['GET'])
+def healthz():
+    return "OK", 200
 
 @app.teardown_appcontext
 def shutdown_session(execption=None):
@@ -69,7 +83,6 @@ def hello_world(username):
                 }
                 message = json.dumps(data)
                 resp = Response(message, status=200, mimetype='application/json')
-                print()
                 return resp
 
             if birhday_date.month < now.month or ((birhday_date.month == now.month) and (birhday_date.day < now.day)):
@@ -88,7 +101,6 @@ def hello_world(username):
                 }
                 message = json.dumps(data)
                 resp = Response(message, status=200, mimetype='application/json')
-                print()
                 return resp
         else:
             abort(404, description="User not found")

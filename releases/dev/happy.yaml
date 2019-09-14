@@ -6,14 +6,16 @@ metadata:
   namespace: dev
   annotations:
     flux.weave.works/automated: "true"
-    flux.weave.works/tag.chart-image: glob:dev-*
+    flux.weave.works/tag.chart-image: semver:~0.1
 spec:
   releaseName: happy-dev
   chart:
     git: git@github.com:drweber/happyBDay
     path: charts/happy
-    ref: master
+    ref: dev
   values:
-    containerPort: 8000
-    image: drweber/happybday:dev-just123fix
+    ingress:
+      enabled: true
+    containerPort: 8080
+    image: drweber/happybday:0.1.0
     replicaCount: 1
